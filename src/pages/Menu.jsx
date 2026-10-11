@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useDrinks } from '../hooks/useDrinks'
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
@@ -11,8 +12,19 @@ export const Menu = () => {
     const { addToCart } = useCart()
     const { showToast } = useToast()
 
+    const [searchParams, setSearchParams] = useSearchParams()
+    const category = searchParams.get('category') || 'all'
+
     const [search, setSearch] = useState('')
-    const [category, setCategory] = useState('all')
+
+    const handleCategoryChange = (newCategory) => {
+        if (newCategory === 'all') {
+            setSearchParams({})
+        } else {
+            setSearchParams({ category: newCategory })
+        }
+        setSearch('')
+    }
 
     const filteredDrinks = useMemo(() => {
         return drinks.filter((drink) => {
@@ -64,7 +76,7 @@ export const Menu = () => {
 
             <SearchBar value={search} onChange={setSearch} />
 
-            <CategoryTabs active={category} onChange={setCategory} />
+            <CategoryTabs active={category} onChange={handleCategoryChange} />
 
             {filteredDrinks.length === 0 ? (
                 <p className="status-msg">No drinks match your search.</p>

@@ -8,7 +8,7 @@ import { Cart } from './pages/Cart'
 import { Orders } from './pages/Orders'
 import { Contact } from './pages/Contact'
 import { Missing } from './pages/Missing'
-
+import { DrinkDetail } from './pages/DrinkDetail'
 function App() {
   return (
     <>
@@ -22,6 +22,7 @@ function App() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="*" element={<Missing />} />
+          <Route path="/drink/:id" element={<DrinkDetail />} />
         </Route>
       </Routes>
     </>

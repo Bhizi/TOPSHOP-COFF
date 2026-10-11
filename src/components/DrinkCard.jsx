@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { QuantitySelector } from './QuantitySelector'
 
 export const DrinkCard = ({ drink, onAdd }) => {
@@ -14,10 +15,15 @@ export const DrinkCard = ({ drink, onAdd }) => {
     return (
         <div className="drink-item">
             <div className="thumbnail">
-                <img src={imgSrc} alt={drink.name} />
+                <Link to={`/drink/${drink.id}`} className="drink-image-link">
+                    <img src={imgSrc} alt={drink.name} />
+                </Link>
 
                 <div className="caption">
-                    <h4>{drink.name}</h4>
+                    <Link to={`/drink/${drink.id}`} className="drink-name-link">
+                        <h4>{drink.name}</h4>
+                    </Link>
+
                     <span className="drink-price">${drink.price}</span>
 
                     <QuantitySelector value={qty} onChange={setQty} />

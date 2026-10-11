@@ -16,7 +16,7 @@ export const Navbar = () => {
                             <img
                                 alt="Logo"
                                 src="/imgs/MILKSHAKE.jpg"
-                                srcSet="/imgs/MILKSHAKE.jpg 600w"
+                                srcSet="/imgs/BS.png 600w"
                                 sizes="(max-width: 767px) 35px, 45px"
                             />
                         </span>
