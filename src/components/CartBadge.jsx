@@ -1,3 +1,7 @@
+import { useCart } from '../context/CartContext'
+
 export const CartBadge = () => {
-    return <span className="cart-badge">0</span>
+    const { totalItems } = useCart()
+
+    return <span className="cart-badge">{totalItems}</span>
 }
