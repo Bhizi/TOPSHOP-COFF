@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useDrinks } from '../hooks/useDrinks'
 import { useCart } from '../context/CartContext'
+import { useToast } from '../context/ToastContext'
 import { SearchBar } from '../components/SearchBar'
 import { CategoryTabs } from '../components/CategoryTabs'
 import { MenuGrid } from '../components/MenuGrid'
@@ -8,6 +9,7 @@ import { MenuGrid } from '../components/MenuGrid'
 export const Menu = () => {
     const { drinks, isLoading, error } = useDrinks()
     const { addToCart } = useCart()
+    const { showToast } = useToast()
 
     const [search, setSearch] = useState('')
     const [category, setCategory] = useState('all')
@@ -31,6 +33,7 @@ export const Menu = () => {
 
     const handleAdd = (drink, qty) => {
         addToCart(drink, qty)
+        showToast(`${qty}x ${drink.name} added to cart!`)
     }
 
     if (isLoading) {
