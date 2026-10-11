@@ -1903,3 +1903,51 @@ textarea.form-control {
     font-size: 18px;
   }
 }
+
+.missing-container {
+  padding-top: 80px;
+  padding-bottom: 80px;
+  text-align: center;
+}
+
+.missing-code {
+  font-size: 120px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #c0392b, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.missing-title {
+  color: #ffffff;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+
+.missing-text {
+  color: #b0b0b0;
+  font-size: 18px;
+  margin-bottom: 32px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 767px) {
+  .missing-code {
+    font-size: 80px;
+  }
+
+  .missing-title {
+    font-size: 24px;
+  }
+
+  .missing-text {
+    font-size: 16px;
+  }
+}
