@@ -1,0 +1,8 @@
+export const Orders = () => {
+    return (
+        <div>
+            <h1>Orders Page</h1>
+            <p>Order history will go here.</p>
+        </div>
+    )
+}
