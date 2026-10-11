@@ -15,12 +15,12 @@ export const DrinkCard = ({ drink, onAdd }) => {
     return (
         <div className="drink-item">
             <div className="thumbnail">
-                <Link to={`/drink/${drink.id}`} className="drink-image-link">
+                <Link to={`/drink/${drink.slug}`} className="drink-image-link">
                     <img src={imgSrc} alt={drink.name} />
                 </Link>
 
                 <div className="caption">
-                    <Link to={`/drink/${drink.id}`} className="drink-name-link">
+                    <Link to={`/drink/${drink.slug}`} className="drink-name-link">
                         <h4>{drink.name}</h4>
                     </Link>
 

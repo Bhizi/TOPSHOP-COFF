@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { FaArrowLeft } from 'react-icons/fa'
-import { doc, getDoc } from 'firebase/firestore'
+import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useCart } from '../context/CartContext'
 import { useToast } from '../context/ToastContext'
 import { QuantitySelector } from '../components/QuantitySelector'
 
 export const DrinkDetail = () => {
-    const { id } = useParams()
+    const { slug } = useParams()
     const { addToCart } = useCart()
     const { showToast } = useToast()
 
@@ -23,10 +23,13 @@ export const DrinkDetail = () => {
         const fetchDrink = async () => {
             setIsLoading(true)
             try {
-                const ref = doc(db, 'drinks', id)
-                const snapshot = await getDoc(ref)
+                const q = query(
+                    collection(db, 'drinks'),
+                    where('slug', '==', slug)
+                )
+                const snapshot = await getDocs(q)
 
-                if (!snapshot.exists()) {
+                if (snapshot.empty) {
                     if (isMounted) {
                         setError('Drink not found')
                         setDrink(null)
@@ -34,8 +37,10 @@ export const DrinkDetail = () => {
                     return
                 }
 
+                const first = snapshot.docs[0]
+
                 if (isMounted) {
-                    setDrink({ id: snapshot.id, ...snapshot.data() })
+                    setDrink({ id: first.id, ...first.data() })
                     setError(null)
                 }
             } catch (err) {
@@ -53,7 +58,7 @@ export const DrinkDetail = () => {
         return () => {
             isMounted = false
         }
-    }, [id])
+    }, [slug])
 
     const handleAdd = () => {
         if (!drink) return
