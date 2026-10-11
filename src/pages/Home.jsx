@@ -1,22 +1,44 @@
 import { useBestSellers } from '../hooks/useBestSellers'
+import { useCart } from '../context/CartContext'
+import { useToast } from '../context/ToastContext'
+import { Hero } from '../components/Hero'
+import { BestSellers } from '../components/BestSellers'
 
 export const Home = () => {
     const { bestSellers, isLoading, error } = useBestSellers()
+    const { addToCart } = useCart()
+    const { showToast } = useToast()
 
-    if (isLoading) return <p style={{ color: 'white' }}>Loading best sellers...</p>
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>
+    const handleAdd = (drink, qty) => {
+        addToCart(drink, qty)
+        showToast(`${qty}x ${drink.name} added to cart!`)
+    }
 
     return (
         <div>
-            <h1>Home Page</h1>
-            <p>Top {bestSellers.length} best sellers:</p>
-            <ul style={{ color: 'white', padding: '20px' }}>
-                {bestSellers.map((drink) => (
-                    <li key={drink.id}>
-                        {drink.name} — ${drink.price}
-                    </li>
-                ))}
-            </ul>
+            <Hero />
+
+            {isLoading && (
+                <div className="container">
+                    <p className="status-msg">Loading best sellers...</p>
+                </div>
+            )}
+
+            {!isLoading && error && (
+                <div className="container">
+                    <p className="status-msg error">Error: {error}</p>
+                </div>
+            )}
+
+            {!isLoading && !error && bestSellers.length > 0 && (
+                <BestSellers drinks={bestSellers} onAdd={handleAdd} />
+            )}
+
+            {!isLoading && !error && bestSellers.length === 0 && (
+                <div className="container">
+                    <p className="status-msg">No best sellers yet.</p>
+                </div>
+            )}
         </div>
     )
 }
