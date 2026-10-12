@@ -9,6 +9,9 @@ import { Orders } from './pages/Orders'
 import { Contact } from './pages/Contact'
 import { Missing } from './pages/Missing'
 import { DrinkDetail } from './pages/DrinkDetail'
+import { Signup } from './pages/Signup'
+import { Login } from './pages/Login'
+
 function App() {
   return (
     <>
@@ -18,11 +21,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/drink/:slug" element={<DrinkDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
           <Route path="*" element={<Missing />} />
-          <Route path="/drink/:slug" element={<DrinkDetail />} />        </Route>
+        </Route>
       </Routes>
     </>
   )
