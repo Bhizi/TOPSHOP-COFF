@@ -1,26 +1,59 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaClipboardList } from 'react-icons/fa'
+import {
+    collection,
+    query,
+    where,
+    getDocs,
+    deleteDoc,
+    doc,
+    orderBy,
+} from 'firebase/firestore'
+import { db } from '../lib/firebase'
+import { useAuth } from '../context/AuthContext'
 import { OrderCard } from '../components/OrderCard'
 import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
 
 export const Orders = () => {
+    const { currentUser } = useAuth()
     const [orders, setOrders] = useState([])
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState(null)
     const { showToast } = useToast()
     const { confirm } = useConfirm()
 
-    useEffect(() => {
-        const history = JSON.parse(localStorage.getItem('orderHistory')) || []
-        setOrders(history)
-    }, [])
-
-    const persist = (next) => {
-        setOrders(next)
-        localStorage.setItem('orderHistory', JSON.stringify(next))
+    const fetchOrders = async () => {
+        if (!currentUser) return
+        setIsLoading(true)
+        try {
+            const q = query(
+                collection(db, 'orders'),
+                where('userId', '==', currentUser.uid)
+            )
+            const snapshot = await getDocs(q)
+            const list = snapshot.docs.map((d) => ({
+                id: d.id,
+                ...d.data(),
+            }))
+            list.sort((a, b) => new Date(b.date) - new Date(a.date))
+            setOrders(list)
+            setError(null)
+        } catch (err) {
+            console.error(err)
+            setError(err.message)
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleDelete = async (index) => {
+    useEffect(() => {
+        fetchOrders()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentUser])
+
+    const handleDelete = async (orderId) => {
         const confirmed = await confirm({
             title: 'Delete order?',
             message: 'This order will be permanently removed from your history.',
@@ -30,9 +63,14 @@ export const Orders = () => {
 
         if (!confirmed) return
 
-        const next = orders.filter((_, i) => i !== index)
-        persist(next)
-        showToast('Order deleted')
+        try {
+            await deleteDoc(doc(db, 'orders', orderId))
+            setOrders((prev) => prev.filter((o) => o.id !== orderId))
+            showToast('Order deleted')
+        } catch (err) {
+            console.error(err)
+            showToast('Could not delete order')
+        }
     }
 
     const handleClearAll = async () => {
@@ -47,8 +85,32 @@ export const Orders = () => {
 
         if (!confirmed) return
 
-        persist([])
-        showToast('All orders cleared')
+        try {
+            await Promise.all(
+                orders.map((o) => deleteDoc(doc(db, 'orders', o.id)))
+            )
+            setOrders([])
+            showToast('All orders cleared')
+        } catch (err) {
+            console.error(err)
+            showToast('Could not clear orders')
+        }
+    }
+
+    if (isLoading) {
+        return (
+            <div className="container orders-container">
+                <p className="status-msg">Loading orders...</p>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="container orders-container">
+                <p className="status-msg error">Error: {error}</p>
+            </div>
+        )
     }
 
     if (orders.length === 0) {
@@ -89,17 +151,14 @@ export const Orders = () => {
             </div>
 
             <div className="orders-list">
-                {[...orders].reverse().map((order, reverseIndex) => {
-                    const originalIndex = orders.length - 1 - reverseIndex
-                    return (
-                        <OrderCard
-                            key={originalIndex}
-                            order={order}
-                            orderNumber={originalIndex + 1}
-                            onDelete={() => handleDelete(originalIndex)}
-                        />
-                    )
-                })}
+                {orders.map((order, index) => (
+                    <OrderCard
+                        key={order.id}
+                        order={order}
+                        orderNumber={orders.length - index}
+                        onDelete={() => handleDelete(order.id)}
+                    />
+                ))}
             </div>
         </div>
     )

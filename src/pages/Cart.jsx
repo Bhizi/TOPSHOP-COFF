@@ -1,12 +1,16 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { FaShoppingCart } from 'react-icons/fa'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { useConfirm } from '../context/ConfirmContext'
 import { CartItem } from '../components/CartItem'
 import { CartSummary } from '../components/CartSummary'
 
 export const Cart = () => {
+    const navigate = useNavigate()
     const {
         cart,
         updateQuantity,
@@ -15,6 +19,7 @@ export const Cart = () => {
         totalItems,
         totalPrice,
     } = useCart()
+    const { currentUser } = useAuth()
     const { showToast } = useToast()
     const { confirm } = useConfirm()
 
@@ -42,6 +47,12 @@ export const Cart = () => {
             return
         }
 
+        if (!currentUser) {
+            showToast('Please log in to place an order')
+            navigate('/login')
+            return
+        }
+
         const itemSummary = cart
             .map((item) => `${item.name} x${item.quantity}`)
             .join('\n')
@@ -55,22 +66,28 @@ export const Cart = () => {
 
         if (!confirmed) return
 
-        const orderData = {
-            items: cart.map((item) => ({
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-            })),
-            total: totalPrice,
-            date: new Date().toISOString(),
+        try {
+            await addDoc(collection(db, 'orders'), {
+                userId: currentUser.uid,
+                userEmail: currentUser.email,
+                displayName: currentUser.displayName,
+                items: cart.map((item) => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                })),
+                total: totalPrice,
+                date: new Date().toISOString(),
+                createdAt: serverTimestamp(),
+            })
+
+            clearCart()
+            showToast('Order placed! Thank you.')
+            navigate('/orders')
+        } catch (err) {
+            console.error(err)
+            showToast('Could not place order. Try again.')
         }
-
-        const history = JSON.parse(localStorage.getItem('orderHistory')) || []
-        history.push(orderData)
-        localStorage.setItem('orderHistory', JSON.stringify(history))
-
-        clearCart()
-        showToast('Order placed! Thank you.')
     }
 
     if (cart.length === 0) {

@@ -2202,3 +2202,62 @@ textarea.form-control {
     font-size: 24px;
   }
 }
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+}
+
+.user-name {
+  color: #ff6b6b;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 12px 0;
+  white-space: nowrap;
+}
+
+.logout-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: white;
+}
+
+@media (max-width: 991px) {
+  .user-menu {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 15px;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .user-name {
+    text-align: center;
+    padding: 0;
+    margin-bottom: 4px;
+  }
+
+  .logout-btn {
+    width: 100%;
+    padding: 12px 15px;
+  }
+}

@@ -2,9 +2,23 @@ import { useRef } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { FaCoffee, FaIceCream, FaStar, FaCaretDown } from 'react-icons/fa'
 import { CartBadge } from './CartBadge'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 
 export const NavLinks = ({ onLinkClick }) => {
     const dropdownRef = useRef(null)
+    const { currentUser, logout } = useAuth()
+    const { showToast } = useToast()
+
+    const handleLogout = async () => {
+        try {
+            await logout()
+            showToast('Signed out')
+            if (onLinkClick) onLinkClick()
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     const closeDropdown = () => {
         if (dropdownRef.current) {
@@ -83,6 +97,32 @@ export const NavLinks = ({ onLinkClick }) => {
                     Cart <CartBadge />
                 </Link>
             </li>
+
+            {currentUser ? (
+                <li className="user-menu">
+                    <span className="user-name">{currentUser.displayName}</span>
+                    <button
+                        type="button"
+                        className="logout-btn"
+                        onClick={handleLogout}
+                    >
+                        Logout
+                    </button>
+                </li>
+            ) : (
+                <>
+                    <li>
+                        <NavLink to="/login" onClick={onLinkClick}>
+                            Login
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink to="/signup" onClick={onLinkClick}>
+                            Sign Up
+                        </NavLink>
+                    </li>
+                </>
+            )}
         </ul>
     )
 }
