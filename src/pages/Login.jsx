@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 
 export const Login = () => {
     const navigate = useNavigate()
+    const location = useLocation()
     const { login } = useAuth()
     const { showToast } = useToast()
 
@@ -52,7 +53,8 @@ export const Login = () => {
         try {
             await login(form.email.trim(), form.password)
             showToast('Welcome back!')
-            navigate('/')
+            const from = location.state?.from?.pathname || '/'
+            navigate(from, { replace: true })
         } catch (err) {
             console.error(err)
 

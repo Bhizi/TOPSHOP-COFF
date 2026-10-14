@@ -36,7 +36,7 @@ export const Cart = () => {
 
         if (!currentUser) {
             showToast('Please log in to place an order')
-            navigate('/login')
+            navigate('/login', { state: { from: { pathname: '/cart' } } })
             return
         }
 

@@ -121,11 +121,7 @@ export const NavLinks = ({ onLinkClick }) => {
                     Contact
                 </NavLink>
             </li>
-            <li>
-                <NavLink to="/orders" onClick={onLinkClick}>
-                    Orders
-                </NavLink>
-            </li>
+           
             <li>
                 <Link to="/cart" onClick={onLinkClick} className="cart-link">
                     Cart <CartBadge />

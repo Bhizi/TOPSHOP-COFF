@@ -2345,3 +2345,12 @@ textarea.form-control {
     justify-content: center;
   }
 }
+
+.toast-item.toast-info {
+  border-color: #e17127;
+  border-left-color: #e17127;
+}
+
+.toast-item.toast-info .toast-icon {
+  color: #e17127;
+}

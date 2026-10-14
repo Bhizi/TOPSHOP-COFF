@@ -9,9 +9,9 @@ export const ToastProvider = ({ children }) => {
     const [toasts, setToasts] = useState([])
     const nextId = useRef(0)
 
-    const showToast = (message) => {
+    const showToast = (message, type = 'success') => {
         const id = nextId.current++
-        setToasts((prev) => [...prev, { id, message }])
+        setToasts((prev) => [...prev, { id, message, type }])
 
         setTimeout(() => {
             setToasts((prev) => prev.filter((t) => t.id !== id))
