@@ -39,21 +39,17 @@ export const AuthProvider = ({ children }) => {
             email,
             password
         )
-
-        await updateProfile(userCredential.user, {
-            displayName: username,
-        })
-
+        await updateProfile(userCredential.user, { displayName: username })
         return userCredential.user
     }
 
     const login = async (email, password) => {
-        const userCredential = await signInWithEmailAndPassword(
+        const credential = await signInWithEmailAndPassword(
             auth,
             email,
             password
         )
-        return userCredential.user
+        return credential.user
     }
 
     const logout = async () => {
@@ -62,13 +58,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider
-            value={{
-                currentUser,
-                loading,
-                signup,
-                login,
-                logout,
-            }}
+            value={{ currentUser, loading, signup, login, logout }}
         >
             {children}
         </AuthContext.Provider>

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../lib/firebase'
+import { useAuth } from '../context/AuthContext'
 
 export const useBestSellers = () => {
+    const { currentUser } = useAuth()
     const [bestSellers, setBestSellers] = useState([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -14,48 +16,40 @@ export const useBestSellers = () => {
             setIsLoading(true)
             try {
                 const drinksSnap = await getDocs(collection(db, 'drinks'))
-                const drinks = drinksSnap.docs.map((doc) => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }))
-
-                const ordersSnap = await getDocs(collection(db, 'orders'))
-                const orders = ordersSnap.docs.map((doc) => doc.data())
+                const drinks = drinksSnap.docs.map((d) => ({ id: d.id, ...d.data() }))
 
                 const counts = {}
-                orders.forEach((order) => {
-                    if (!order.items) return
-                    order.items.forEach((item) => {
-                        counts[item.name] = (counts[item.name] || 0) + 1
+                if (currentUser) {
+                    const ordersSnap = await getDocs(collection(db, 'orders'))
+                    ordersSnap.docs.forEach((d) => {
+                        const order = d.data()
+                        if (!order.items) return
+                        order.items.forEach((item) => {
+                            counts[item.name] = (counts[item.name] || 0) + 1
+                        })
                     })
-                })
+                }
 
-                const sorted = [...drinks].sort((a, b) => {
-                    const ca = counts[a.name] || 0
-                    const cb = counts[b.name] || 0
-                    return cb - ca
-                })
+                const sorted = [...drinks].sort(
+                    (a, b) => (counts[b.name] || 0) - (counts[a.name] || 0)
+                )
 
                 if (isMounted) {
                     setBestSellers(sorted.slice(0, 3))
                     setError(null)
                 }
             } catch (err) {
-                if (isMounted) {
-                    setError(err.message)
-                    setBestSellers([])
-                }
+                if (isMounted) setError(err.message)
             } finally {
                 if (isMounted) setIsLoading(false)
             }
         }
 
         fetch()
-
         return () => {
             isMounted = false
         }
-    }, [])
+    }, [currentUser])
 
     return { bestSellers, isLoading, error }
 }

@@ -1,12 +1,43 @@
-import { createContext, useContext } from 'react'
-import { useLocalStorage } from '../hooks/useLocalStorage'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { useAuth } from './AuthContext'
 
 const CartContext = createContext({})
 
 export const useCart = () => useContext(CartContext)
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useLocalStorage('coffeeCart', [])
+    const { currentUser, loading } = useAuth()
+
+    const storageKey = currentUser ? `coffeeCart_${currentUser.uid}` : null
+
+    const [cart, setCart] = useState([])
+
+    useEffect(() => {
+        if (loading) return
+
+        if (!storageKey) {
+            setCart([])
+            return
+        }
+
+        try {
+            const stored = localStorage.getItem(storageKey)
+            setCart(stored ? JSON.parse(stored) : [])
+        } catch {
+            setCart([])
+        }
+    }, [storageKey, loading])
+
+    useEffect(() => {
+        if (loading) return
+        if (!storageKey) return
+
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(cart))
+        } catch {
+            console.warn('Failed to save cart')
+        }
+    }, [storageKey, cart, loading])
 
     const addToCart = (drink, quantity = 1) => {
         setCart((prev) => {
@@ -51,7 +82,6 @@ export const CartProvider = ({ children }) => {
     }
 
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0)
-
     const totalPrice = cart.reduce(
         (sum, item) => sum + item.price * item.quantity,
         0

@@ -2261,3 +2261,87 @@ textarea.form-control {
     padding: 12px 15px;
   }
 }
+
+/* User dropdown */
+.user-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c0392b, #e74c3c);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.user-dropdown-menu {
+  min-width: 180px;
+}
+
+.dropdown-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item-btn:hover {
+  background: linear-gradient(135deg, #e74c3c, #0c0c0c);
+  transform: translateX(5px);
+}
+
+.dropdown-item-btn svg {
+  font-size: 14px;
+}
+
+/* Slightly distinct Login / Sign Up styles */
+.nav-login {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.nav-signup {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 30px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 991px) {
+  .user-dropdown {
+    width: 100%;
+  }
+
+  .user-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .user-dropdown-menu {
+    position: static;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    margin-top: 4px;
+  }
+
+  .dropdown-item-btn {
+    justify-content: center;
+  }
+}

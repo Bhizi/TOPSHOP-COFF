@@ -1,41 +1,75 @@
 import { useRef } from 'react'
-import { NavLink, Link } from 'react-router-dom'
-import { FaCoffee, FaIceCream, FaStar, FaCaretDown } from 'react-icons/fa'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
+import {
+    FaCoffee,
+    FaIceCream,
+    FaStar,
+    FaCaretDown,
+    FaClipboardList,
+    FaSignOutAlt,
+} from 'react-icons/fa'
 import { CartBadge } from './CartBadge'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 
 export const NavLinks = ({ onLinkClick }) => {
-    const dropdownRef = useRef(null)
+    const menuDropdownRef = useRef(null)
+    const userDropdownRef = useRef(null)
     const { currentUser, logout } = useAuth()
     const { showToast } = useToast()
+    const navigate = useNavigate()
+
+    const closeMenuDropdown = () => {
+        if (menuDropdownRef.current) {
+            menuDropdownRef.current.classList.remove('open')
+        }
+    }
+
+    const handleMenuToggle = (e) => {
+        e.preventDefault()
+        if (userDropdownRef.current) {
+            userDropdownRef.current.classList.remove('open')
+        }
+        if (menuDropdownRef.current) {
+            menuDropdownRef.current.classList.toggle('open')
+        }
+    }
+
+    const handleUserToggle = (e) => {
+        e.preventDefault()
+        if (menuDropdownRef.current) {
+            menuDropdownRef.current.classList.remove('open')
+        }
+        if (userDropdownRef.current) {
+            userDropdownRef.current.classList.toggle('open')
+        }
+    }
+
+    const handleMenuItemClick = () => {
+        closeMenuDropdown()
+        if (onLinkClick) onLinkClick()
+    }
 
     const handleLogout = async () => {
         try {
             await logout()
             showToast('Signed out')
+            if (userDropdownRef.current) {
+                userDropdownRef.current.classList.remove('open')
+            }
             if (onLinkClick) onLinkClick()
+            navigate('/')
         } catch (err) {
             console.error(err)
         }
     }
 
-    const closeDropdown = () => {
-        if (dropdownRef.current) {
-            dropdownRef.current.classList.remove('open')
+    const handleUserMenuClick = (path) => {
+        if (userDropdownRef.current) {
+            userDropdownRef.current.classList.remove('open')
         }
-    }
-
-    const handleDropdownToggle = (e) => {
-        e.preventDefault()
-        if (dropdownRef.current) {
-            dropdownRef.current.classList.toggle('open')
-        }
-    }
-
-    const handleMenuItemClick = () => {
-        closeDropdown()
         if (onLinkClick) onLinkClick()
+        navigate(path)
     }
 
     return (
@@ -50,11 +84,11 @@ export const NavLinks = ({ onLinkClick }) => {
                     About
                 </NavLink>
             </li>
-            <li className="dropdown" ref={dropdownRef}>
+            <li className="dropdown" ref={menuDropdownRef}>
                 <button
                     type="button"
                     className="dropdown-toggle"
-                    onClick={handleDropdownToggle}
+                    onClick={handleMenuToggle}
                 >
                     Menu <FaCaretDown className="caret-icon" />
                 </button>
@@ -99,25 +133,49 @@ export const NavLinks = ({ onLinkClick }) => {
             </li>
 
             {currentUser ? (
-                <li className="user-menu">
-                    <span className="user-name">{currentUser.displayName}</span>
+                <li className="dropdown user-dropdown" ref={userDropdownRef}>
                     <button
                         type="button"
-                        className="logout-btn"
-                        onClick={handleLogout}
+                        className="dropdown-toggle user-toggle"
+                        onClick={handleUserToggle}
                     >
-                        Logout
+                        <span className="user-avatar">
+                            {currentUser.displayName.charAt(0).toUpperCase()}
+                        </span>
+                        {currentUser.displayName}
+                        <FaCaretDown className="caret-icon" />
                     </button>
+                    <ul className="dropdown-menu user-dropdown-menu">
+                        <li>
+                            <button
+                                type="button"
+                                className="dropdown-item-btn"
+                                onClick={() => handleUserMenuClick('/orders')}
+                            >
+                                <FaClipboardList /> My Orders
+                            </button>
+                        </li>
+                        <li className="divider" />
+                        <li>
+                            <button
+                                type="button"
+                                className="dropdown-item-btn"
+                                onClick={handleLogout}
+                            >
+                                <FaSignOutAlt /> Logout
+                            </button>
+                        </li>
+                    </ul>
                 </li>
             ) : (
                 <>
                     <li>
-                        <NavLink to="/login" onClick={onLinkClick}>
+                        <NavLink to="/login" onClick={onLinkClick} className="nav-login">
                             Login
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/signup" onClick={onLinkClick}>
+                        <NavLink to="/signup" onClick={onLinkClick} className="nav-signup">
                             Sign Up
                         </NavLink>
                     </li>

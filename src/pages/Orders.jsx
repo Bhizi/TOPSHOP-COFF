@@ -1,15 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FaClipboardList } from 'react-icons/fa'
-import {
-    collection,
-    query,
-    where,
-    getDocs,
-    deleteDoc,
-    doc,
-    orderBy,
-} from 'firebase/firestore'
+import { collection, query, where, getDocs, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
 import { OrderCard } from '../components/OrderCard'
@@ -24,44 +16,51 @@ export const Orders = () => {
     const { showToast } = useToast()
     const { confirm } = useConfirm()
 
-    const fetchOrders = async () => {
-        if (!currentUser) return
-        setIsLoading(true)
-        try {
-            const q = query(
-                collection(db, 'orders'),
-                where('userId', '==', currentUser.uid)
-            )
-            const snapshot = await getDocs(q)
-            const list = snapshot.docs.map((d) => ({
-                id: d.id,
-                ...d.data(),
-            }))
-            list.sort((a, b) => new Date(b.date) - new Date(a.date))
-            setOrders(list)
-            setError(null)
-        } catch (err) {
-            console.error(err)
-            setError(err.message)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
     useEffect(() => {
+        let isMounted = true
+
+        const fetchOrders = async () => {
+            if (!currentUser) {
+                if (isMounted) setIsLoading(false)
+                return
+            }
+
+            setIsLoading(true)
+            try {
+                const q = query(
+                    collection(db, 'orders'),
+                    where('userId', '==', currentUser.uid)
+                )
+                const snap = await getDocs(q)
+                const list = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+                list.sort((a, b) => new Date(b.date) - new Date(a.date))
+                if (isMounted) {
+                    setOrders(list)
+                    setError(null)
+                }
+            } catch (err) {
+                console.error(err)
+                if (isMounted) setError(err.message)
+            } finally {
+                if (isMounted) setIsLoading(false)
+            }
+        }
+
         fetchOrders()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        return () => {
+            isMounted = false
+        }
     }, [currentUser])
 
     const handleDelete = async (orderId) => {
-        const confirmed = await confirm({
+        const ok = await confirm({
             title: 'Delete order?',
             message: 'This order will be permanently removed from your history.',
             confirmText: 'Delete',
             cancelText: 'Keep',
         })
-
-        if (!confirmed) return
+        if (!ok) return
 
         try {
             await deleteDoc(doc(db, 'orders', orderId))
@@ -75,20 +74,16 @@ export const Orders = () => {
 
     const handleClearAll = async () => {
         if (orders.length === 0) return
-
-        const confirmed = await confirm({
+        const ok = await confirm({
             title: 'Clear all orders?',
-            message: `This will permanently delete all ${orders.length} orders. This action cannot be undone.`,
+            message: `This will permanently delete all ${orders.length} orders.`,
             confirmText: 'Clear All',
             cancelText: 'Cancel',
         })
-
-        if (!confirmed) return
+        if (!ok) return
 
         try {
-            await Promise.all(
-                orders.map((o) => deleteDoc(doc(db, 'orders', o.id)))
-            )
+            await Promise.all(orders.map((o) => deleteDoc(doc(db, 'orders', o.id))))
             setOrders([])
             showToast('All orders cleared')
         } catch (err) {
@@ -116,19 +111,12 @@ export const Orders = () => {
     if (orders.length === 0) {
         return (
             <div className="container orders-container">
-                <h2 className="section-title center">
-                    Order <span>History</span>
-                </h2>
-
+                <h2 className="section-title center">Order <span>History</span></h2>
                 <div className="empty-cart">
-                    <div className="icon">
-                        <FaClipboardList />
-                    </div>
+                    <div className="icon"><FaClipboardList /></div>
                     <h3>No orders yet</h3>
                     <p>Start shopping and your orders will appear here!</p>
-                    <Link to="/menu" className="btn-shop">
-                        Browse Drinks
-                    </Link>
+                    <Link to="/menu" className="btn-shop">Browse Drinks</Link>
                 </div>
             </div>
         )
@@ -136,20 +124,12 @@ export const Orders = () => {
 
     return (
         <div className="container orders-container">
-            <h2 className="section-title center">
-                Order <span>History</span>
-            </h2>
-
+            <h2 className="section-title center">Order <span>History</span></h2>
             <div className="orders-actions">
-                <button
-                    type="button"
-                    className="clear-orders-btn"
-                    onClick={handleClearAll}
-                >
+                <button className="clear-orders-btn" onClick={handleClearAll}>
                     Clear All Orders
                 </button>
             </div>
-
             <div className="orders-list">
                 {orders.map((order, index) => (
                     <OrderCard

@@ -11,32 +11,19 @@ import { CartSummary } from '../components/CartSummary'
 
 export const Cart = () => {
     const navigate = useNavigate()
-    const {
-        cart,
-        updateQuantity,
-        removeFromCart,
-        clearCart,
-        totalItems,
-        totalPrice,
-    } = useCart()
+    const { cart, updateQuantity, removeFromCart, clearCart, totalItems, totalPrice } = useCart()
     const { currentUser } = useAuth()
     const { showToast } = useToast()
     const { confirm } = useConfirm()
 
-    const handleUpdateQuantity = (name, delta) => {
-        updateQuantity(name, delta)
-    }
-
     const handleRemove = async (name) => {
-        const confirmed = await confirm({
+        const ok = await confirm({
             title: 'Remove item?',
             message: `Remove ${name} from your cart?`,
             confirmText: 'Remove',
             cancelText: 'Keep',
         })
-
-        if (!confirmed) return
-
+        if (!ok) return
         removeFromCart(name)
         showToast(`${name} removed from cart`)
     }
@@ -53,34 +40,25 @@ export const Cart = () => {
             return
         }
 
-        const itemSummary = cart
-            .map((item) => `${item.name} x${item.quantity}`)
-            .join('\n')
-
-        const confirmed = await confirm({
+        const summary = cart.map((i) => `${i.name} x${i.quantity}`).join('\n')
+        const ok = await confirm({
             title: 'Confirm your order?',
-            message: `${itemSummary}\n\nTotal: $${totalPrice.toFixed(2)}`,
+            message: `${summary}\n\nTotal: $${totalPrice.toFixed(2)}`,
             confirmText: 'Place Order',
             cancelText: 'Go Back',
         })
-
-        if (!confirmed) return
+        if (!ok) return
 
         try {
             await addDoc(collection(db, 'orders'), {
                 userId: currentUser.uid,
                 userEmail: currentUser.email,
                 displayName: currentUser.displayName,
-                items: cart.map((item) => ({
-                    name: item.name,
-                    price: item.price,
-                    quantity: item.quantity,
-                })),
+                items: cart.map((i) => ({ name: i.name, price: i.price, quantity: i.quantity })),
                 total: totalPrice,
                 date: new Date().toISOString(),
                 createdAt: serverTimestamp(),
             })
-
             clearCart()
             showToast('Order placed! Thank you.')
             navigate('/orders')
@@ -96,16 +74,11 @@ export const Cart = () => {
                 <h2 className="cart-title">
                     Your <span>Shopping Cart</span>
                 </h2>
-
                 <div className="empty-cart">
-                    <div className="icon">
-                        <FaShoppingCart />
-                    </div>
+                    <div className="icon"><FaShoppingCart /></div>
                     <h3>Your cart is empty</h3>
                     <p>Looks like you haven't added any drinks yet.</p>
-                    <Link to="/menu" className="btn-shop">
-                        Browse Drinks
-                    </Link>
+                    <Link to="/menu" className="btn-shop">Browse Drinks</Link>
                 </div>
             </div>
         )
@@ -116,19 +89,17 @@ export const Cart = () => {
             <h2 className="cart-title">
                 Your <span>Shopping Cart</span>
             </h2>
-
             <div className="cart-layout">
                 <div className="cart-items">
                     {cart.map((item) => (
                         <CartItem
                             key={item.name}
                             item={item}
-                            onUpdateQuantity={handleUpdateQuantity}
+                            onUpdateQuantity={updateQuantity}
                             onRemove={handleRemove}
                         />
                     ))}
                 </div>
-
                 <div className="cart-sidebar">
                     <CartSummary
                         totalItems={totalItems}
