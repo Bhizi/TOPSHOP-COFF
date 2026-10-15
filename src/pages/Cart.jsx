@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { FaShoppingCart } from 'react-icons/fa'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
@@ -15,6 +16,7 @@ export const Cart = () => {
     const { currentUser } = useAuth()
     const { showToast } = useToast()
     const { confirm } = useConfirm()
+    const [submitting, setSubmitting] = useState(false)
 
     const handleRemove = async (name) => {
         const ok = await confirm({
@@ -49,12 +51,18 @@ export const Cart = () => {
         })
         if (!ok) return
 
+        setSubmitting(true)
+
         try {
             await addDoc(collection(db, 'orders'), {
                 userId: currentUser.uid,
                 userEmail: currentUser.email,
                 displayName: currentUser.displayName,
-                items: cart.map((i) => ({ name: i.name, price: i.price, quantity: i.quantity })),
+                items: cart.map((i) => ({
+                    name: i.name,
+                    price: i.price,
+                    quantity: i.quantity,
+                })),
                 total: totalPrice,
                 date: new Date().toISOString(),
                 createdAt: serverTimestamp(),
@@ -65,6 +73,8 @@ export const Cart = () => {
         } catch (err) {
             console.error(err)
             showToast('Could not place order. Try again.')
+        } finally {
+            setSubmitting(false)
         }
     }
 
@@ -75,10 +85,14 @@ export const Cart = () => {
                     Your <span>Shopping Cart</span>
                 </h2>
                 <div className="empty-cart">
-                    <div className="icon"><FaShoppingCart /></div>
+                    <div className="icon">
+                        <FaShoppingCart />
+                    </div>
                     <h3>Your cart is empty</h3>
                     <p>Looks like you haven't added any drinks yet.</p>
-                    <Link to="/menu" className="btn-shop">Browse Drinks</Link>
+                    <Link to="/menu" className="btn-shop">
+                        Browse Drinks
+                    </Link>
                 </div>
             </div>
         )
@@ -105,6 +119,7 @@ export const Cart = () => {
                         totalItems={totalItems}
                         totalPrice={totalPrice}
                         onCheckout={handleCheckout}
+                        submitting={submitting}
                     />
                 </div>
             </div>

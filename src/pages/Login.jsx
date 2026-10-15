@@ -127,7 +127,9 @@ export const Login = () => {
                     >
                         {submitting ? 'Signing in...' : 'Log In'}
                     </button>
-
+                    <p className="auth-switch">
+    <Link to="/forgot-password">Forgot password?</Link>
+</p>
                     <p className="auth-switch">
                         Don't have an account? <Link to="/signup">Sign Up</Link>
                     </p>

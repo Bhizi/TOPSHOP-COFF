@@ -2354,3 +2354,25 @@ textarea.form-control {
 .toast-item.toast-info .toast-icon {
   color: #e17127;
 }
+
+.auth-success {
+  text-align: center;
+  color: #b0b0b0;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.auth-success p {
+  margin-bottom: 16px;
+}
+
+.auth-success strong {
+  color: #ff6b6b;
+}
+
+.btn-checkout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

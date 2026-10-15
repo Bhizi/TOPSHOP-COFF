@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-export const CartSummary = ({ totalItems, totalPrice, onCheckout }) => {
+export const CartSummary = ({ totalItems, totalPrice, onCheckout, submitting }) => {
     return (
         <div className="cart-summary">
             <h3>Order Summary</h3>
@@ -24,8 +24,9 @@ export const CartSummary = ({ totalItems, totalPrice, onCheckout }) => {
                 type="button"
                 className="btn-checkout"
                 onClick={onCheckout}
+                disabled={submitting}
             >
-                Checkout
+                {submitting ? 'Placing order...' : 'Checkout'}
             </button>
 
             <Link to="/menu" className="btn-continue">
